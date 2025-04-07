@@ -74,8 +74,8 @@ Aplikasi ini mengusung model **SaaS (Software as a Service)**, memungkinkan mult
 ## ⚙️ Instalasi
 
 ```bash
-git clone https://github.com/username/b2b-inventory-laravel.git
-cd b2b-inventory-laravel
+git clone https://github.com/Hbiiiii2/SmartStock-app.git
+cd SmartStock-app
 composer install
 cp .env.example .env
 php artisan key:generate
