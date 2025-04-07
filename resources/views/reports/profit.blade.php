@@ -1,0 +1,100 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Profit Report') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <!-- Filter Section -->
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+                        <form action="{{ route('reports.profit') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                                <input type="date" name="start_date" id="start_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
+                                <input type="date" name="end_date" id="end_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                                    Filter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium text-green-800">Total Revenue</h3>
+                            <p class="text-2xl font-bold text-green-600">
+                                Rp {{ number_format($stockOuts->sum(function($stockOut) { return $stockOut->quantity * $stockOut->price_per_unit; }), 0, ',', '.') }}
+                            </p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium text-red-800">Total Cost</h3>
+                            <p class="text-2xl font-bold text-red-600">
+                                Rp {{ number_format($stockIns->sum(function($stockIn) { return $stockIn->quantity * $stockIn->price_per_unit; }), 0, ',', '.') }}
+                            </p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium text-blue-800">Net Profit</h3>
+                            <p class="text-2xl font-bold text-blue-600">
+                                Rp {{ number_format($stockOuts->sum(function($stockOut) { return $stockOut->quantity * $stockOut->price_per_unit; }) - $stockIns->sum(function($stockIn) { return $stockIn->quantity * $stockIn->price_per_unit; }), 0, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Report Table -->
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units Sold</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profit</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Margin</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($products as $product)
+                                @php
+                                    $stockOutsForProduct = $stockOuts->where('product_id', $product->id);
+                                    $stockInsForProduct = $stockIns->where('product_id', $product->id);
+                                    $revenue = $stockOutsForProduct->sum(function($stockOut) { return $stockOut->quantity * $stockOut->price_per_unit; });
+                                    $cost = $stockInsForProduct->sum(function($stockIn) { return $stockIn->quantity * $stockIn->price_per_unit; });
+                                    $profit = $revenue - $cost;
+                                    $margin = $revenue > 0 ? ($profit / $revenue) * 100 : 0;
+                                @endphp
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $product->name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $product->category->name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $stockOutsForProduct->sum('quantity') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Rp {{ number_format($revenue, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">Rp {{ number_format($cost, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $profit >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            Rp {{ number_format($profit, 0, ',', '.') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $margin >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ number_format($margin, 2) }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout> 
