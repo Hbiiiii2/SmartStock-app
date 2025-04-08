@@ -14,9 +14,9 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="mb-4">
-                                <label for="date" class="block text-gray-700 text-sm font-bold mb-2">Date</label>
-                                <input type="date" name="date" id="date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="{{ old('date', date('Y-m-d')) }}" required>
-                                @error('date')
+                                <label for="removed_at" class="block text-gray-700 text-sm font-bold mb-2">Date</label>
+                                <input type="date" name="removed_at" id="removed_at" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="{{ old('removed_at', date('Y-m-d')) }}" required>
+                                @error('removed_at')
                                     <p class="text-red-500 text-xs italic">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -26,7 +26,9 @@
                                 <select name="product_id" id="product_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                                     <option value="">Select Product</option>
                                     @foreach($products as $product)
-                                        <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>{{ $product->name }} ({{ $product->sku }}) - Stock: {{ $product->stock }} {{ $product->unit }}</option>
+                                        <option value="{{ $product->id }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>
+                                            {{ $product->name }} ({{ $product->sku }}) - Stock: {{ $product->stock }} {{ $product->unit }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 @error('product_id')

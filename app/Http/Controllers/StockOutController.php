@@ -29,6 +29,7 @@ class StockOutController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'removed_at' => 'required|date',
+            'customer' => 'required|string|max:255',
             'notes' => 'nullable|string',
         ]);
 
@@ -40,7 +41,14 @@ class StockOutController extends Controller
                         ->withInput();
         }
 
-        $stockOut = StockOut::create($validated);
+        // Create stock out record
+        $stockOut = StockOut::create([
+            'product_id' => $validated['product_id'],
+            'quantity' => $validated['quantity'],
+            'removed_at' => $validated['removed_at'],
+            'customer' => $validated['customer'],
+            'notes' => $validated['notes'],
+        ]);
         
         // Update product stock
         $product->stock -= $validated['quantity'];
@@ -50,11 +58,7 @@ class StockOutController extends Controller
             ->with('success', 'Stock out recorded successfully.');
     }
 
-    public function edit(StockOut $stockOut)
-    {
-        $products = Product::all();
-        return view('stock-out.edit', compact('stockOut', 'products'));
-    }
+  
 
     public function update(Request $request, StockOut $stockOut)
     {

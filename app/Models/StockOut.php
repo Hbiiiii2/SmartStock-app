@@ -13,6 +13,8 @@ class StockOut extends Model
         'product_id',
         'quantity',
         'removed_at',
+        'price_per_unit',
+        'customer',
         'notes',
     ];
 
